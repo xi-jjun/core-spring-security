@@ -1,10 +1,12 @@
 package io.security.corespringsecurity.security.config;
 
+import io.security.corespringsecurity.security.provider.CustomAuthenticationProvider;
 import jdk.internal.dynalink.support.NameCodec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
@@ -22,13 +24,35 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	private final UserDetailsService userDetailsService;
 
 	/**
-	 * 이렇게 하면, Spring Security 는 우리가 만든 UserDetailsService 구현체를 사용하여
-	 * 인증처리를 진행하게 된다.
+	 * 우리가 만든 CustomAuthenticationProvider class 가
+	 * UserDetailsService 를 받아서 쓰고 있기 때문에 원래 있던 configure method 대신 아래
+	 * method 로 변경한 것.
 	 */
 	@Override
 	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-		auth.userDetailsService(userDetailsService);
+		auth.authenticationProvider(authenticationProvider());
 	}
+
+	/**
+	 * Spring Security 가 우리가 만든 CustomAuthenticationProvider 를 참조해서 검증하게 된다.
+	 */
+	@Bean
+	public AuthenticationProvider authenticationProvider() {
+		return new CustomAuthenticationProvider();
+	}
+
+//	/**
+//	 * 이렇게 하면, Spring Security 는 우리가 만든 UserDetailsService 구현체를 사용하여
+//	 * 인증처리를 진행하게 된다.
+
+//   * 우리가 만든 CustomAuthenticationProvider class 가
+//	 * UserDetailsService 를 받아서 쓰고 있기 때문에 원래 있던 configure method 대신 아래
+//	 * method 로 변경한 것.
+//	 */
+//	@Override
+//	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+//		auth.userDetailsService(userDetailsService);
+//	}
 
 	/**
 	 * 사용자 만들어서 각각 권한 부여하는 method
