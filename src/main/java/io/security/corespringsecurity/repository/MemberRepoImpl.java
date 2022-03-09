@@ -16,9 +16,8 @@ public class MemberRepoImpl implements MemberRepository {
 
 	@Override
 	@Transactional
-	public Member save(Member member) {
+	public void save(Member member) {
 		em.persist(member);
-		return member;
 	}
 
 	@Override
