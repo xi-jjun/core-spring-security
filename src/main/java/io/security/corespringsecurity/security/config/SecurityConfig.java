@@ -1,6 +1,7 @@
-package io.security.corespringsecurity.security;
+package io.security.corespringsecurity.security.config;
 
 import jdk.internal.dynalink.support.NameCodec;
+import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -9,12 +10,25 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
+	private final UserDetailsService userDetailsService;
+
+	/**
+	 * 이렇게 하면, Spring Security 는 우리가 만든 UserDetailsService 구현체를 사용하여
+	 * 인증처리를 진행하게 된다.
+	 */
+	@Override
+	protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+		auth.userDetailsService(userDetailsService);
+	}
 
 	/**
 	 * 사용자 만들어서 각각 권한 부여하는 method
@@ -77,12 +91,18 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/", "member/login/**", "/members").permitAll() // 보안 필터의 검사를 받는다. 단지 그 결과가 모든 접근에 대한 허락일 뿐이다.
 				// 그러나 ignoring 은 필터 자체를 거치지 않는 것이다.
 				.antMatchers("/my-page").hasRole("USER") // "/my-page" 경로에 USER 라는 권한을 가졌다면 접근 가능하게 한다.
+				/**
+				 * 우리가 Entity 에서 role field 를 ROLE_USER 로 했는데 여기서 USER, MANAGER 등등으로 하는 이유
+				 * Params:
+				 * role – the role that should be required which is prepended with ROLE_ automatically (i.e. USER, ADMIN, etc).
+				 * It should not start with ROLE_
+				 */
 				.antMatchers("/manager").hasRole("MANAGER")
 				.antMatchers("/config").hasRole("ADMIN")
 				.anyRequest().authenticated()
 
-		.and()
+				.and()
 				.formLogin()
-				;
+		;
 	}
 }
