@@ -111,8 +111,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	@Override
 	protected void configure(HttpSecurity http) throws Exception {
 		http
-				.authorizeHttpRequests()
-				.antMatchers("/", "member/login/**", "/members").permitAll() // 보안 필터의 검사를 받는다. 단지 그 결과가 모든 접근에 대한 허락일 뿐이다.
+				.authorizeRequests()
+				.antMatchers("/", "member/login/**", "/members", "/error").permitAll() // 보안 필터의 검사를 받는다. 단지 그 결과가 모든 접근에 대한 허락일 뿐이다.
 				// 그러나 ignoring 은 필터 자체를 거치지 않는 것이다.
 				.antMatchers("/my-page").hasRole("USER") // "/my-page" 경로에 USER 라는 권한을 가졌다면 접근 가능하게 한다.
 				/**
@@ -125,8 +125,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.antMatchers("/config").hasRole("ADMIN")
 				.anyRequest().authenticated()
 
-				.and()
+		.and()
 				.formLogin()
+				// 우리가 만든 custom login page 를 추가하기 위한 코드들
+				.loginPage("/login") // login
+				.loginProcessingUrl("/login_proc") // login.html 의 action 을 보면 login_proc 이라고 되어 있다.
+				.defaultSuccessUrl("/") // login 성공 => root 로 이동
+				.permitAll() // 로그인은 인증 받지 못한 사용자들도 쓸 수 있어야 하기 때문이다.
 		;
 	}
 }
