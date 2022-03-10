@@ -19,7 +19,7 @@ public class MemberController {
 
 	@GetMapping("/my-page")
 	public String myPage() {
-		return "my-page";
+		return "member/my-page";
 	}
 
 	@GetMapping("/members")
