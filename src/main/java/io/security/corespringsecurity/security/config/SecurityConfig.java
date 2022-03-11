@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationDetailsSource;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -21,7 +22,8 @@ import org.springframework.stereotype.Service;
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
-	private final UserDetailsService userDetailsService;
+//	private final UserDetailsService userDetailsService; // 안씀 => Provider 쓰기 때문.
+	private final AuthenticationDetailsSource authenticationDetailsSource;
 
 	/**
 	 * 우리가 만든 CustomAuthenticationProvider class 가
@@ -130,6 +132,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				// 우리가 만든 custom login page 를 추가하기 위한 코드들
 				.loginPage("/login") // login
 				.loginProcessingUrl("/login_proc") // login.html 의 action 을 보면 login_proc 이라고 되어 있다.
+				/**
+				 * 인증 처리 과정 속에서 2개의 클래스를 통해 전달되는 파라미터를 설정하고 저장하는 작업... 이라고 강의에서 나옴... 이해 안감
+				 */
+				.authenticationDetailsSource(authenticationDetailsSource)
 				.defaultSuccessUrl("/") // login 성공 => root 로 이동
 				.permitAll() // 로그인은 인증 받지 못한 사용자들도 쓸 수 있어야 하기 때문이다.
 		;
