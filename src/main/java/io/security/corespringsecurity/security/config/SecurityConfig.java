@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 
 @Configuration
@@ -24,6 +25,7 @@ import org.springframework.stereotype.Service;
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //	private final UserDetailsService userDetailsService; // 안씀 => Provider 쓰기 때문.
 	private final AuthenticationDetailsSource authenticationDetailsSource;
+	private final AuthenticationSuccessHandler authenticationSuccessHandler;
 
 	/**
 	 * 우리가 만든 CustomAuthenticationProvider class 가
@@ -137,6 +139,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				 */
 				.authenticationDetailsSource(authenticationDetailsSource)
 				.defaultSuccessUrl("/") // login 성공 => root 로 이동
+				.successHandler(authenticationSuccessHandler) // 우리가 만든 handler 가 인증이 성공하게 되면 호출되게 해준다.
 				.permitAll() // 로그인은 인증 받지 못한 사용자들도 쓸 수 있어야 하기 때문이다.
 		;
 	}
