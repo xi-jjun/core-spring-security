@@ -1,10 +1,12 @@
 package io.security.corespringsecurity.security.provider;
 
+import io.security.corespringsecurity.security.common.FormWebAuthenticationDetails;
 import io.security.corespringsecurity.security.service.MemberContext;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -44,6 +46,22 @@ public class CustomAuthenticationProvider implements AuthenticationProvider {
 		if (!passwordEncoder.matches(password, memberContext.getMember().getPassword())) {
 			throw new BadCredentialsException("Bad Credentials Error");
 		}
+
+		/**
+		 * secret key 검증을 해볼 것임.
+		 * id, pw 외에도 클라이언트에게 받은 데이터 중에
+		 * details 로 부터 받은 정보랑 다르면 예외 발생시켜서 최종적인 인증 진행하는 것.
+		 */
+		FormWebAuthenticationDetails formWebAuthenticationDetails = (FormWebAuthenticationDetails) authentication.getDetails();
+		String secretKey = formWebAuthenticationDetails.getSecretKey();
+		/**
+		 * "secret" : login.html 의 name="secret_key" 의 value 값이다.
+		 * 해당 html 의 value 값이 우리가 지정한 "secret" 과 같을 경우 => 인증 통과.
+		 */
+		if (secretKey == null || !"secret".equals(secretKey)) {
+			throw new InsufficientAuthenticationException("InsufficientAuthenticationException");
+		}
+
 
 		/**
 		 * 최종적으로 인증에 성공한 인증 객체를 생성.
