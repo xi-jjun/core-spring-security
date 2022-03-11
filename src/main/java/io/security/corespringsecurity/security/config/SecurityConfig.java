@@ -16,6 +16,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.stereotype.Service;
 
@@ -26,6 +27,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //	private final UserDetailsService userDetailsService; // 안씀 => Provider 쓰기 때문.
 	private final AuthenticationDetailsSource authenticationDetailsSource;
 	private final AuthenticationSuccessHandler authenticationSuccessHandler;
+	private final AuthenticationFailureHandler authenticationFailureHandler;
 
 	/**
 	 * 우리가 만든 CustomAuthenticationProvider class 가
@@ -116,7 +118,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 	protected void configure(HttpSecurity http) throws Exception {
 		http
 				.authorizeRequests()
-				.antMatchers("/", "member/login/**", "/members", "/error").permitAll() // 보안 필터의 검사를 받는다. 단지 그 결과가 모든 접근에 대한 허락일 뿐이다.
+				.antMatchers("/", "member/login/**", "/login*", "/members", "/error").permitAll() // 보안 필터의 검사를 받는다. 단지 그 결과가 모든 접근에 대한 허락일 뿐이다.
 				// 그러나 ignoring 은 필터 자체를 거치지 않는 것이다.
 				.antMatchers("/my-page").hasRole("USER") // "/my-page" 경로에 USER 라는 권한을 가졌다면 접근 가능하게 한다.
 				/**
@@ -140,6 +142,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.authenticationDetailsSource(authenticationDetailsSource)
 				.defaultSuccessUrl("/") // login 성공 => root 로 이동
 				.successHandler(authenticationSuccessHandler) // 우리가 만든 handler 가 인증이 성공하게 되면 호출되게 해준다.
+				.failureHandler(authenticationFailureHandler)
 				.permitAll() // 로그인은 인증 받지 못한 사용자들도 쓸 수 있어야 하기 때문이다.
 		;
 	}
