@@ -1,7 +1,7 @@
 package io.security.corespringsecurity.security.config;
 
+import io.security.corespringsecurity.security.handler.CustomAccessDeniedHandler;
 import io.security.corespringsecurity.security.provider.CustomAuthenticationProvider;
-import jdk.internal.dynalink.support.NameCodec;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -13,19 +13,21 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
-import org.springframework.stereotype.Service;
+import org.springframework.security.web.authentication.WebAuthenticationDetails;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 //	private final UserDetailsService userDetailsService; // 안씀 => Provider 쓰기 때문.
-	private final AuthenticationDetailsSource authenticationDetailsSource;
+	private final AuthenticationDetailsSource<HttpServletRequest, WebAuthenticationDetails> authenticationDetailsSource;
 	private final AuthenticationSuccessHandler authenticationSuccessHandler;
 	private final AuthenticationFailureHandler authenticationFailureHandler;
 
@@ -144,6 +146,19 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 				.successHandler(authenticationSuccessHandler) // 우리가 만든 handler 가 인증이 성공하게 되면 호출되게 해준다.
 				.failureHandler(authenticationFailureHandler)
 				.permitAll() // 로그인은 인증 받지 못한 사용자들도 쓸 수 있어야 하기 때문이다.
+		.and()
+				.exceptionHandling()
+				.accessDeniedHandler(accessDeniedHandler()) // 우리가 만든 CustomAccessDeniedHandler 를 사용하기 위해 설정해주는 코드
 		;
+	}
+
+	/**
+	 * Bean 으로 등록하여 스프링이 관리할 수 있게 해준다.
+	 */
+	@Bean
+	public AccessDeniedHandler accessDeniedHandler() {
+		CustomAccessDeniedHandler accessDeniedHandler = new CustomAccessDeniedHandler();
+		accessDeniedHandler.setErrorPage("/denied");
+		return accessDeniedHandler;
 	}
 }
