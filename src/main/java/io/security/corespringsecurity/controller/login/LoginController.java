@@ -1,5 +1,6 @@
 package io.security.corespringsecurity.controller.login;
 
+import io.security.corespringsecurity.domain.Member;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.logout.SecurityContextLogoutHandler;
@@ -37,5 +38,18 @@ public class LoginController {
 		}
 
 		return "redirect:/login";
+	}
+
+	/**
+	 * 권한이 없는 자원에 접근하려고 할 때 denied page 로 가게 해주는 controller
+	 */
+	@GetMapping("/denied")
+	public String accessDenied(@RequestParam(value = "exception", required = false) String exception, Model model) {
+		Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+		Member member = (Member) authentication.getPrincipal();
+		model.addAttribute("username", member.getId());
+		model.addAttribute("exception", exception);
+
+		return "member/login/denied";
 	}
 }
